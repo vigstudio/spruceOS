@@ -25,7 +25,35 @@ class AppMenu:
     def __init__(self):
         self.appFinder = Device.get_device().get_app_finder()
         self.show_all_apps = False
-    
+
+    @staticmethod
+    def _resolve_builtin_icon(app_folder, theme_icon_name):
+        icon = None
+        if app_folder:
+            icon = AppUtils.get_first_existing_path([os.path.join(app_folder, "icon.png")])
+        if not icon:
+            icon = AppUtils.get_icon(app_folder, "icon.png")
+        if not icon:
+            icon = AppUtils.get_icon(None, theme_icon_name)
+        if not icon:
+            icon = Theme._icon(theme_icon_name)
+        return icon
+
+    @staticmethod
+    def _append_builtin_app(app_list, label, description, icon, extra_data, handler, hidden=False):
+        suffix = "(Hidden)" if hidden else ""
+        app_list.append(
+            GridOrListEntry(
+                primary_text=label + suffix,
+                image_path=icon,
+                image_path_selected=icon,
+                description=description,
+                icon=icon,
+                extra_data=extra_data,
+                value=handler,
+            )
+        )
+
     def save_app_selection(self, selected):
         if(selected.get_selection() is not None):
             PyUiState.set_last_app_selection(selected.get_selection().get_extra_data().get_label())
@@ -37,8 +65,11 @@ class AppMenu:
         Device.get_device().run_app(folder,launch)
         Controller.clear_input_queue()
         Display.reinitialize()
-        
+
     def append_pyui_apps(self, app_list):
+        from menus.apps.trimui_fn_settings_app import TrimuiFnSettingsApp
+        from menus.apps.video_player_app import VideoPlayerApp
+
         system_config = Device.get_device().get_system_config()
         if(not system_config.simple_mode_enabled()):
             boxart_scraper_config = PyUiAppConfig("Boxart Scraper")
@@ -73,10 +104,46 @@ class AppMenu:
                         )
                 )
 
-                
+            if Device.get_device().get_device_name() in (
+                "TRIMUI_SMART_PRO_S",
+                "TRIMUI_SMART_PRO",
+                "TRIMUI_BRICK",
+            ):
+                video_player_config = PyUiAppConfig(Language.get("videoPlayer", "Video Player"))
+                hidden = AppsManager.is_hidden(video_player_config) and not self.show_all_apps
+                if not hidden:
+                    icon = self._resolve_builtin_icon("/mnt/SDCARD/App/VideoPlayer", "ffplay.png")
+                    self._append_builtin_app(
+                        app_list,
+                        video_player_config.get_label(),
+                        Language.get("playVideosFromMedia", "Play videos from Roms/MEDIA"),
+                        icon,
+                        video_player_config,
+                        VideoPlayerApp().run,
+                        hidden=AppsManager.is_hidden(video_player_config),
+                    )
+
+            if Device.get_device().get_device_name() in (
+                "TRIMUI_SMART_PRO_S",
+                "TRIMUI_SMART_PRO",
+            ):
+                fn_settings_config = PyUiAppConfig(Language.get("fnKeySettings", "Fn Key Settings"))
+                hidden = AppsManager.is_hidden(fn_settings_config) and not self.show_all_apps
+                if not hidden:
+                    icon = self._resolve_builtin_icon("/mnt/SDCARD/App/fn_editor", "fnkey.png")
+                    self._append_builtin_app(
+                        app_list,
+                        fn_settings_config.get_label(),
+                        Language.get("fnKeySettingsDesc", "Fn key and DIP switch actions"),
+                        icon,
+                        fn_settings_config,
+                        TrimuiFnSettingsApp().run,
+                        hidden=AppsManager.is_hidden(fn_settings_config),
+                    )
+
     def run_app_selection(self) :
         running = True
-    
+
         system_config = Device.get_device().get_system_config()
 
         while(running):
@@ -90,7 +157,7 @@ class AppMenu:
                 devices = app.get_devices()
                 supported_device = not devices or Device.get_device().get_device_name() in devices
                 allowed_in_mode = not system_config.simple_mode_enabled() or not app.get_hide_in_simple_mode()
-                if(allowed_in_mode and app.get_label() is not None and not hidden and supported_device):
+                if(allowed_in_mode and app.get_label() is not None and not app.is_hidden() and not hidden and supported_device):
                     icon = AppUtils.get_icon(app.get_folder(),app.get_icon())
                     app_list.append(
                         GridOrListEntry(
@@ -120,12 +187,12 @@ class AppMenu:
             if(view is None):
                 view = ViewCreator.create_view(
                     view_type=Theme.get_view_type_for_app_menu(),
-                    top_bar_text=Language.apps(), 
+                    top_bar_text=Language.apps(),
                     options=app_list,
                     selected_index=selected.get_index())
             else:
                 view.set_options(app_list)
-            
+
             selected = Selection(None, None, None)
             while(selected.get_input() is None):
                 selected = view.get_selection(select_controller_inputs = [ControllerInput.A, ControllerInput.MENU])
@@ -147,5 +214,4 @@ class AppMenu:
                 elif(Theme.skip_main_menu() and ControllerInput.R1 == selected.get_input()):
                     self.save_app_selection(selected)
                     return ControllerInput.R1
-                        
-                    
+
