@@ -93,6 +93,8 @@ class Display:
 
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
+    _screensaver_active = False
+    _screensaver_saved_lumination = None
     _problematic_images = set()  # Class-level set to track images that won't load properly
     _problematic_image_keywords = [
         "No such file or directory",
@@ -1030,6 +1032,28 @@ class Display:
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
         cls.renderer.present()
         Device.get_device().post_present_operations()
+
+    @classmethod
+    def blank_screen(cls):
+        if cls._screensaver_active:
+            return
+        cls._screensaver_active = True
+        cls._screensaver_saved_lumination = Device.get_device().lumination()
+        Device.get_device().lower_lumination()  # set to 0
+        while Device.get_device().lumination() > 0:
+            Device.get_device().lower_lumination()
+        from display.screensaver import ScreenSaver
+        ScreenSaver.render()
+
+    @classmethod
+    def restore_from_blank(cls):
+        if not cls._screensaver_active:
+            return
+        cls._screensaver_active = False
+        target = cls._screensaver_saved_lumination if cls._screensaver_saved_lumination is not None else 5
+        while Device.get_device().lumination() < target:
+            Device.get_device().raise_lumination()
+        cls._screensaver_saved_lumination = None
 
     #TODO make default false and fix everywhere
     @classmethod
