@@ -1,3 +1,5 @@
+import os
+
 from controller.controller_inputs import ControllerInput
 from menus.language.language import Language
 from menus.settings import settings_menu
@@ -41,6 +43,71 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
         PyUiConfig.set("screensaverTimeoutSec", new_val)
         PyUiConfig.save()
 
+    def change_overlay_opacity(self, input):
+        current = Theme._data.get("screensaver", {}).get("overlayOpacity", 0.0)
+        if ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input:
+            new_val = min(1.0, round(current + 0.1, 1))
+        elif ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input:
+            new_val = max(0.0, round(current - 0.1, 1))
+        elif ControllerInput.A == input:
+            new_val = 0.0 if current > 0 else 0.5
+        else:
+            return
+        self._set_screensaver_prop("overlayOpacity", new_val)
+
+    def change_blur(self, input):
+        current = Theme._data.get("screensaver", {}).get("blur", 0)
+        if ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input:
+            new_val = min(30, current + 2)
+        elif ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input:
+            new_val = max(0, current - 2)
+        elif ControllerInput.A == input:
+            new_val = 0 if current > 0 else 10
+        else:
+            return
+        self._set_screensaver_prop("blur", new_val)
+
+    def cycle_bg_image(self, input):
+        ss = Theme._data.get("screensaver", {})
+        current = ss.get("bgImage", "")
+        images = self._find_bg_images()
+        if not images:
+            self._set_screensaver_prop("bgImage", "")
+            return
+
+        if ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input:
+            if current in images:
+                idx = (images.index(current) + 1) % len(images)
+            else:
+                idx = 0
+            self._set_screensaver_prop("bgImage", images[idx])
+        elif ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input:
+            if current in images:
+                idx = (images.index(current) - 1) % len(images)
+            else:
+                idx = len(images) - 1
+            self._set_screensaver_prop("bgImage", images[idx])
+        elif ControllerInput.A == input:
+            self._set_screensaver_prop("bgImage", "")
+
+    def _find_bg_images(self):
+        from devices.device import Device
+        paths = [
+            os.path.join(Device.get_device().get_sd_card_path(), "skins"),
+            os.path.join(Device.get_device().get_sd_card_path(), "App", "PyUI"),
+        ]
+        images = []
+        exts = (".png", ".jpg", ".jpeg", ".bmp")
+        for base in paths:
+            if not os.path.exists(base):
+                continue
+            for root, dirs, files in os.walk(base):
+                for f in files:
+                    if f.lower().endswith(exts) and "screensaver" in f.lower():
+                        images.append(os.path.join(root, f))
+        images.sort()
+        return images
+
     def _set_screensaver_prop(self, key, value):
         ss = Theme._data.get("screensaver", {})
         ss[key] = value
@@ -49,6 +116,11 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
 
     def _get_screensaver_prop(self, key, default=True):
         return Theme._data.get("screensaver", {}).get(key, default)
+
+    def _format_image_label(self, path):
+        if not path:
+            return Language.get("screensaverBgNone", "None (solid color)")
+        return os.path.basename(path)
 
     def build_options_list(self):
         option_list = []
@@ -100,6 +172,46 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
                 description=None,
                 icon=None,
                 value=self.toggle_show_battery
+            )
+        )
+
+        current_image = self._get_screensaver_prop("bgImage", "")
+        option_list.append(
+            GridOrListEntry(
+                primary_text=Language.get("screensaverBgImage", "Background image"),
+                value_text="<    " + self._format_image_label(current_image) + "    >",
+                image_path=None,
+                image_path_selected=None,
+                description=Language.get("screensaverBgImageDesc", "Auto-detects images with 'screensaver' in name"),
+                icon=None,
+                value=self.cycle_bg_image
+            )
+        )
+
+        overlay_opacity = self._get_screensaver_prop("overlayOpacity", 0.0)
+        option_list.append(
+            GridOrListEntry(
+                primary_text=Language.get("screensaverOverlayOpacity", "Overlay opacity"),
+                value_text="<    " + f"{int(overlay_opacity * 100)}%" + "    >",
+                image_path=None,
+                image_path_selected=None,
+                description=Language.get("screensaverOverlayOpacityDesc", "Dark overlay over background (0=off, 100=full black)"),
+                icon=None,
+                value=self.change_overlay_opacity
+            )
+        )
+
+        blur = self._get_screensaver_prop("blur", 0)
+        blur_text = str(blur) if blur > 0 else Language.get("off", "Off")
+        option_list.append(
+            GridOrListEntry(
+                primary_text=Language.get("screensaverBlur", "Background blur"),
+                value_text="<    " + blur_text + "    >",
+                image_path=None,
+                image_path_selected=None,
+                description=Language.get("screensaverBlurDesc", "Blur effect on background image (0=off)"),
+                icon=None,
+                value=self.change_blur
             )
         )
 

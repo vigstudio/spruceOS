@@ -28,6 +28,7 @@ class Controller:
     controller_interface = None
     _watch_for_secret_code = False
     _screensaver_active = False
+    _game_running = False
 
     # The sequence we want to detect
     _SECRET_CODE = [
@@ -171,15 +172,16 @@ class Controller:
                     Controller._screensaver_active = False
                     return Controller.last_controller_input is not None
 
-        # Screensaver: check if idle timeout reached
-        now = time.time()
-        time_since_last_input = now - Controller.last_input_time
-        screensaver_timeout = PyUiConfig.get_screensaver_timeout_sec()
-        if screensaver_timeout > 0 and time_since_last_input >= screensaver_timeout:
-            Display.blank_screen()
-            Controller._screensaver_active = True
-            Controller.last_input_time = time.time()
-            return False
+        # Screensaver: check if idle timeout reached (skip if game running)
+        if not Controller._game_running:
+            now = time.time()
+            time_since_last_input = now - Controller.last_input_time
+            screensaver_timeout = PyUiConfig.get_screensaver_timeout_sec()
+            if screensaver_timeout > 0 and time_since_last_input >= screensaver_timeout:
+                Display.blank_screen()
+                Controller._screensaver_active = True
+                Controller.last_input_time = time.time()
+                return False
 
         #if(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"Controller.last_controller_input = {Controller.last_controller_input}")
@@ -269,7 +271,8 @@ class Controller:
                 #    PyUiLogger.get_logger().info(f"Controller input held down but isn't menu")
                 Controller.hold_delay = Device.get_device().get_system_config().get_input_rate_limit_ms() / 1000
 
-        Controller.last_input_time = time.time()
+        if Controller.last_controller_input is not None:
+            Controller.last_input_time = time.time()
         #if(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"returning last_controller_input as: {Controller.last_controller_input}")
 

@@ -478,5 +478,12 @@
   "screensaverTimeoutDesc": "Minutes before screensaver activates (0=off)",
   "screensaverShowClock": "Show clock",
   "screensaverShowDate": "Show date",
-  "screensaverShowBattery": "Show battery"
+  "screensaverShowBattery": "Show battery",
+  "screensaverBgImage": "Background image",
+  "screensaverBgImageDesc": "Auto-detects images with 'screensaver' in name",
+  "screensaverBgNone": "None (solid color)",
+  "screensaverOverlayOpacity": "Overlay opacity",
+  "screensaverOverlayOpacityDesc": "Dark overlay over background (0=off, 100=full black)",
+  "screensaverBlur": "Background blur",
+  "screensaverBlurDesc": "Blur effect on background image (0=off)"
 }

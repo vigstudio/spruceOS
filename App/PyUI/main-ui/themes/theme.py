@@ -1704,3 +1704,19 @@ class Theme():
     @classmethod
     def get_screensaver_bg_color(cls):
         return cls._data.get("screensaver", {}).get("bgColor", "#000000")
+
+    @classmethod
+    def get_screensaver_bg_image(cls):
+        return cls._data.get("screensaver", {}).get("bgImage", "")
+
+    @classmethod
+    def get_screensaver_overlay_opacity(cls):
+        return cls._data.get("screensaver", {}).get("overlayOpacity", 0.0)
+
+    @classmethod
+    def get_screensaver_overlay_color(cls):
+        return cls._data.get("screensaver", {}).get("overlayColor", "#000000")
+
+    @classmethod
+    def get_screensaver_blur(cls):
+        return cls._data.get("screensaver", {}).get("blur", 0)

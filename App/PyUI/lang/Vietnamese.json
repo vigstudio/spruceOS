@@ -658,5 +658,12 @@
   "screensaverTimeoutDesc": "Phút trước khi màn hình chờ bật (0=tắt)",
   "screensaverShowClock": "Hiển thị đồng hồ",
   "screensaverShowDate": "Hiển thị ngày",
-  "screensaverShowBattery": "Hiển thị pin"
+  "screensaverShowBattery": "Hiển thị pin",
+  "screensaverBgImage": "Ảnh nền",
+  "screensaverBgImageDesc": "Tự động tìm ảnh có 'screensaver' trong tên",
+  "screensaverBgNone": "Không có (màu đen)",
+  "screensaverOverlayOpacity": "Độ phủ tối",
+  "screensaverOverlayOpacityDesc": "Lớp phủ tối lên nền (0=tắt, 100=đen hoàn toàn)",
+  "screensaverBlur": "Làm mờ nền",
+  "screensaverBlurDesc": "Hiệu ứng làm mờ trên ảnh nền (0=tắt)"
 }
