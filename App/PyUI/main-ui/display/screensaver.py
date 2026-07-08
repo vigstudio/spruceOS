@@ -3,6 +3,7 @@ import datetime
 import os
 import sdl2
 import sdl2.sdlimage
+import sdl2.sdlttf
 
 from devices.device import Device
 from display.font_purpose import FontPurpose
@@ -214,11 +215,9 @@ class ScreenSaver:
 
     @classmethod
     def _draw_text(cls, text, x, y, color, font_size, Display, center=True):
-        from sdl2 import sdlttf
-
         font_path = Theme.get_font(FontPurpose.LIST)
         try:
-            font = sdlttf.TTF_OpenFont(font_path.encode("utf-8"), font_size) if font_path else None
+            font = sdl2.sdlttf.TTF_OpenFont(font_path.encode("utf-8"), font_size) if font_path else None
         except Exception:
             font = None
 
@@ -226,8 +225,8 @@ class ScreenSaver:
             return
 
         try:
-            sdl_color = sdl2.SDL_Color(color[0], color[1], color[2])
-            surface = sdlttf.TTF_RenderUTF8_Blended(font, text.encode("utf-8"), sdl_color)
+            sdl_color = sdl2.SDL_Color(color[0], color[1], color[2], 255)
+            surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(font, text.encode("utf-8"), sdl_color)
             if not surface:
                 return
 
@@ -251,4 +250,4 @@ class ScreenSaver:
         except Exception as e:
             PyUiLogger.get_logger().error(f"ScreenSaver text render error: {e}")
         finally:
-            sdlttf.TTF_CloseFont(font)
+            sdl2.sdlttf.TTF_CloseFont(font)

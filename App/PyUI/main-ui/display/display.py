@@ -1038,10 +1038,6 @@ class Display:
         if cls._screensaver_active:
             return
         cls._screensaver_active = True
-        cls._screensaver_saved_lumination = Device.get_device().lumination()
-        Device.get_device().lower_lumination()  # set to 0
-        while Device.get_device().lumination() > 0:
-            Device.get_device().lower_lumination()
         from display.screensaver import ScreenSaver
         ScreenSaver.render()
 
@@ -1050,10 +1046,6 @@ class Display:
         if not cls._screensaver_active:
             return
         cls._screensaver_active = False
-        target = cls._screensaver_saved_lumination if cls._screensaver_saved_lumination is not None else 5
-        while Device.get_device().lumination() < target:
-            Device.get_device().raise_lumination()
-        cls._screensaver_saved_lumination = None
 
     #TODO make default false and fix everywhere
     @classmethod
