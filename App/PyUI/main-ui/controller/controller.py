@@ -27,6 +27,7 @@ class Controller:
     first_check_after_gs_triggered = False
     controller_interface = None
     _watch_for_secret_code = False
+    _screensaver_active = False
 
     # The sequence we want to detect
     _SECRET_CODE = [
@@ -150,6 +151,35 @@ class Controller:
         DEFAULT_TIMEOUT_FLAG = -2
         INPUT_DEBOUNCE_SECONDS = 0.2
         POLL_INTERVAL_SECONDS = 0.005
+
+        from display.display import Display
+
+        # Screensaver: if already blanked, wait for any input to restore
+        if Controller._screensaver_active:
+            while True:
+                Controller.controller_interface.force_refresh()
+                if Controller.still_held_down():
+                    time.sleep(POLL_INTERVAL_SECONDS)
+                    continue
+                ms = int(POLL_INTERVAL_SECONDS * 1000)
+                inp = Controller.controller_interface.get_input(ms)
+                if inp is not None:
+                    Controller.set_last_input(inp)
+                    Controller.controller_interface.clear_input_queue()
+                    Display.restore_from_blank()
+                    Controller.last_input_time = time.time()
+                    Controller._screensaver_active = False
+                    return Controller.last_controller_input is not None
+
+        # Screensaver: check if idle timeout reached
+        now = time.time()
+        time_since_last_input = now - Controller.last_input_time
+        screensaver_timeout = PyUiConfig.get_screensaver_timeout_sec()
+        if screensaver_timeout > 0 and time_since_last_input >= screensaver_timeout:
+            Display.blank_screen()
+            Controller._screensaver_active = True
+            Controller.last_input_time = time.time()
+            return False
 
         #if(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"Controller.last_controller_input = {Controller.last_controller_input}")

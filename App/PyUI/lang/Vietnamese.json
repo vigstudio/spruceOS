@@ -651,5 +651,12 @@
   "joystickMode": "Chế độ joystick",
   "joystickModeDesc": "D-pad làm cần analog trái",
   "fnDiagnostics": "Chẩn đoán",
-  "fnDiagnosticsDesc": "Trạng thái công tắc Fn, CPU, quạt và scene"
+  "fnDiagnosticsDesc": "Trạng thái công tắc Fn, CPU, quạt và scene",
+  "screensaver": "Màn hình chờ",
+  "screensaverDesc": "Cài đặt hiển thị khi màn hình nhàn",
+  "screensaverTimeout": "Thời gian chờ",
+  "screensaverTimeoutDesc": "Phút trước khi màn hình chờ bật (0=tắt)",
+  "screensaverShowClock": "Hiển thị đồng hồ",
+  "screensaverShowDate": "Hiển thị ngày",
+  "screensaverShowBattery": "Hiển thị pin"
 }

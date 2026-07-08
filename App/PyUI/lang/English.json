@@ -471,5 +471,12 @@
   "joystickMode": "Joystick mode",
   "joystickModeDesc": "D-pad as left stick",
   "fnDiagnostics": "Diagnostics",
-  "fnDiagnosticsDesc": "Fn switch, CPU, fan, and scene status"
+  "fnDiagnosticsDesc": "Fn switch, CPU, fan, and scene status",
+  "screensaver": "Screensaver",
+  "screensaverDesc": "Idle screen display settings",
+  "screensaverTimeout": "Timeout",
+  "screensaverTimeoutDesc": "Minutes before screensaver activates (0=off)",
+  "screensaverShowClock": "Show clock",
+  "screensaverShowDate": "Show date",
+  "screensaverShowBattery": "Show battery"
 }
