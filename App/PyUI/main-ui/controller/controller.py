@@ -11,7 +11,7 @@ class Controller:
     index = None
     name = None
     mapping = None
-    last_input_time = 0
+    last_input_time = time.time()
     hold_delay = 0
     additional_button_watchers = []
     is_check_for_hotkey = False
