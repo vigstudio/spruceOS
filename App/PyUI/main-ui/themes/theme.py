@@ -1711,7 +1711,7 @@ class Theme():
 
     @classmethod
     def get_screensaver_overlay_opacity(cls):
-        return cls._data.get("screensaver", {}).get("overlayOpacity", 0.0)
+        return cls._data.get("screensaver", {}).get("overlayOpacity", 0.3)
 
     @classmethod
     def get_screensaver_overlay_color(cls):

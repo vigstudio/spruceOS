@@ -380,6 +380,8 @@ class Display:
 
     @classmethod
     def set_page_bg(cls, page_bg):
+        if cls._screensaver_active:
+            return
         background = Theme.background(page_bg)
         if(background is not None and os.path.exists(background)):
             cls.set_new_bg(background, is_custom_theme_background=True)
